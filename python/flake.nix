@@ -5,14 +5,23 @@
 
   outputs = { self, nixpkgs }:
     let
-      system = builtins.currentSystem;
-      pkgs = import nixpkgs { inherit system; };
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "aarch64-darwin"
+      ];
     in {
-      devShells.${system}.default = pkgs.mkShell {
-        packages = with pkgs; [
-          python312
-          uv
-        ];
-      };
+      devShells = nixpkgs.lib.genAttrs systems (system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+        in {
+          default = pkgs.mkShell {
+            packages = with pkgs; [
+              python312
+              uv
+            ];
+          };
+        });
     };
 }
